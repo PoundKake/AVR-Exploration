@@ -25,11 +25,27 @@ const float DELAY_VAL_MS = 1000.00;	// This is how many milliseconds the delay f
  */
 void blinkOnBoardLED(char pinNum, float delay) 
 { 
-	delay = DELAY_VAL_MS ;	// This immediately assigns the value of delay to the globally defined value to avoid compilation errors.
-	PORTB = pinNum; 
+	if (DELAY_VAL_MS)
+		delay = DELAY_VAL_MS ;		// This immediately assigns the value of delay to the globally defined value to avoid compilation errors.
+	else
+		delay = 1000.0;		// The default value for delay is 1ms = 1000.0
+		
+	PORTB |= pinNum; 
 	_delay_ms(delay);
 	PORTB = 0x00;
 	_delay_ms(delay);
+}
+
+/**
+ * Sets proper registers for Fast-PWM mode .
+ *
+ * 
+ * @return void
+ */
+void fastPWMCofig(char pinNum) 
+{ 
+	PORTB |= (1 << 3);
+	PORTB |= (1 << 2);
 }
 
 // Main function
@@ -48,5 +64,4 @@ int main(void)
 	return 0;
 }
 
-//PORTB |= (1 << 3);
-//PORTB |= (1 << 2);
+

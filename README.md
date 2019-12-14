@@ -17,7 +17,7 @@ The pins listed below are the pins we will be using for the waveform generation 
 * **PB1** (PCINT1/OC1A)
 * **PB2** (PCINT2/SS/OC1B)
 
-These pins are both on **PORTB** which means to use these pins as ouputs, we need to toggle their value in the Data Direction Register for PORTB (**DDRB**) high (1).
+These pins are both on **PORTB** which means to use these pins as ouputs, we need to toggle their value in the Data Direction Register for PORTB (**DDRB**) high (logic 1).
 This can be done with the following statement: 
 
 ```c
