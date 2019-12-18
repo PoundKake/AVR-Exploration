@@ -30,16 +30,35 @@
 <li><a href="https://www.mouser.com/datasheet/2/268/Atmel-2586-AVR-8-bit-Microcontroller-ATtiny25-ATti-1315542.pdf">ATtiny85-20P Datasheet</a></li>
 </ul>
 <h2 id="atmega328pblink-project-notes">ATmega328p/Blink Project Notes:</h2>
-<h3 id="pwm-clear-timer-on-compare-match-ctc-mode">PWM Clear Timer on Compare Match (CTC) Mode:</h3>
+<hr>
+<h3 id="fast-pwm-mode">Fast PWM Mode:</h3>
 <p>The pins listed below are the pins we will be using for the waveform generation of the PWM signal of two different color LED's.<br>
 <em>NOTE: These value where determined from the datasheets referenced above.</em></p>
 <ul>
 <li><strong>PB1</strong> (PCINT1/OC1A)</li>
 <li><strong>PB2</strong> (PCINT2/SS/OC1B)</li>
 </ul>
-<p>These pins are both on <strong>PORTB</strong> which means to use these pins as ouputs, we need to toggle their value in the Data Direction Register for PORTB (<strong>DDRB</strong>) high (1).
+<p>These pins are both on <strong>PORTB</strong> which means to use these pins as ouputs, we need to toggle their value in the Data Direction Register for PORTB (<strong>DDRB</strong>) high (logic 1).
 This can be done with the following statement:</p>
-<pre><code class="language-c"><div>DDRB |= <span class="hljs-number">0x06</span> <span class="hljs-comment">// This is equivalent to 0000 0110</span>
+<pre><code class="language-c"><div>DDRB |= <span class="hljs-number">0x03</span> <span class="hljs-comment">// This is equivalent to 0000 0011 and setting PB1 and PB2 as outputs.</span>
+</div></code></pre>
+<p>Next we are going to focus on the <strong>ICR1</strong> which we will use to define our TOP off value.
+This can be done with the following statement:</p>
+<pre><code class="language-c"><div>ICR1 = <span class="hljs-number">0xFFFF</span>; <span class="hljs-comment">// This is setting our TOP value to 16-bit max.</span>
+</div></code></pre>
+<p>Once our cut off is defined</p>
+<p>Next we are going to focus on the <strong>OCR1A</strong> which we will use to define our compare value. Otherwise the TCNT1 will just reset when the TOP value is reached.
+This can be done with the following statement:</p>
+<pre><code class="language-c"><div>OCR1A = <span class="hljs-number">0x00FF</span>; <span class="hljs-comment">// This should produce a duty cycle of 50%.</span>
+</div></code></pre>
+<p>Next we need to focus on setting the proper modes of the timer/counter.</p>
+<p>More specifically we want a non-inverting, Fast PWM waveform that uses ICR1 as the TOP value with no prescaling.
+This can be done with the following statement:</p>
+<pre><code class="language-c"><div>TCCR1A |= (<span class="hljs-number">1</span> &lt;&lt; WGM11);
+TCCR1B |= (<span class="hljs-number">1</span> &lt;&lt; WGM12)|(<span class="hljs-number">1</span> &lt;&lt; WGM13);
+<span class="hljs-comment">// set Fast PWM mode using ICR1 as TOP</span>
+    
+TCCR1B |= (<span class="hljs-number">1</span> &lt;&lt; CS10);  <span class="hljs-comment">// START the timer with no prescaler.</span>
 </div></code></pre>
 
     </body>

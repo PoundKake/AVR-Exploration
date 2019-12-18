@@ -11,10 +11,21 @@
 #include <stdio.h>
 #include <avr/io.h>
 #include <util/delay.h>
-#include <math.h>
+#include <math.h>		// Math is used for the sine wave modeling of the duty cycle.
 
 // Global variable definitions.
 const float DELAY_VAL_MS = 1000.00;	// This is how many milliseconds the delay function will delay.
+
+/**
+ * Takes the designated bit number (represented in hexidecimal) to be used with blinkOnBoardLED() and sets it as an output.
+ *
+ * @param pinNum char
+ * @return void
+ */
+void blinkOnBoardLEDConfig(char bitNum) 
+{	
+	DDRB |= bitNum;
+}
 
 /**
  * Takes the designated pin number and toggles it on and off dictated by the defined parameter for delay.
@@ -38,30 +49,52 @@ void blinkOnBoardLED(char pinNum, float delay)
 
 /**
  * Sets proper registers for Fast-PWM mode .
- *
  * 
+ * @param pinNum char
  * @return void
  */
-void fastPWMCofig(char pinNum) 
+void fastPWMModeCofig() 
 { 
-	PORTB |= (1 << 3);
-	PORTB |= (1 << 2);
+	//PORTB |= (1 << (pinNum - 1));		This will be implemented in the future.
+	// The frequency of the PWM signal can be calculated 
+	// freq_pwm = (freq_clk)/(2*N*(1 + TOP))
+	
+	DDRB |= (1<<DDB2)|(1<<DDB1);
+	// PB1 and PB2 is now an output
+	
+	ICR1 = 0xFFFF;
+	// Set TOP to 16bit
+	
+	OCR1A = 0x3FFF;
+	// set PWM for 25% duty cycle @ 16bit
+
+	OCR1B = 0xBFFF;
+	// set PWM for 75% duty cycle @ 16bit
+
+	TCCR1A |= (1 << COM1A1)|(1 << COM1B1);
+	// set none-inverting mode
+
+	TCCR1A |= (1 << WGM11);
+	TCCR1B |= (1 << WGM12)|(1 << WGM13);
+	// set Fast PWM mode using ICR1 as TOP
+	    
+	TCCR1B |= (1 << CS10);
+	// START the timer with no prescaler.
+		
 }
 
 // Main function
 int main(void)
 {
-	DDRB |= 0x06;						// This defines the DDRx Register for PORTB. This should be 0000 0110
-	//DDRB |= 0x20;						// This defines the DDRx Register for PORTB. This should be 0001 0000
-	char pin5 = 0x20;
+	char pin5 = 0x20; // This defines the DDRx Register for PORTB. This should be 0001 0000
+	blinkOnBoardLEDConfig(pin5);
+	fastPWMModeCofig();
 	
     /* Replace with your application code */
     while (1) 
     {
 		// This blinks an led on and off. Useful for debugging and testing of the MCU control
-		blinkOnBoardLED(pin5, DELAY_VAL_MS);
+		//blinkOnBoardLED(pin5, DELAY_VAL_MS);
 	}
 	return 0;
 }
-
-
