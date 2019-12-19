@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <avr/io.h>
 #include <util/delay.h>
-#include <math.h>		// Math is used for the sine wave modeling of the duty cycle.
+#include <math.h>		// Math is used for the cosine wave modeling of the duty cycle.
 
 // Global variable definitions.
 const float DELAY_VAL_MS = 1000.00;	// This is how many milliseconds the delay function will delay.
@@ -79,8 +79,49 @@ void fastPWMModeCofig()
 	// set Fast PWM mode using ICR1 as TOP
 	    
 	TCCR1B |= (1 << CS10);
-	// START the timer with no prescaler.
-		
+	// START the timer with no prescaler.s
+}
+
+/**
+ * Alters the duty cycle of a Fast-PWM mode waveform.
+ * 
+ * @return void
+ * 
+ * Equation used to model cyclic pulse:
+ * y(x) = (-0.5)cos(x) + 0.5
+ * 
+ * This will create a normalized cosine wave that has a max value of 1 and a min value of 0.
+ *
+ * TOP Value = OxFFFF // This is 16-Bit max value
+ * 
+ * We will need to set OCR1A to the result of y(x) to be able 
+ * to control the brightness of the LED's with the cyclic nautre 
+ * of the COSINE function.
+ * 
+ * We will need to increment a counter that resets after 360
+ * This can be achieved with the %
+ * 
+ * Example: 
+ *      x %= 360
+ */
+void changeFastPWMDutyCycle() 
+{
+	int x = 0;
+
+	// NOTE: The variable 'Samples_Max' and the for loop are a discrete representation of this algorithm.
+	// This should only be used for testing and configuration.
+	//
+	// For a continuous representation of this, just replace the for loop with 'while(1)'.
+	int Samples_Max = 720;
+	for(int i=0; i<=Samples_Max; i++)
+	{
+		double fx = ((-0.5)*cos((x*M_PI)/180) + 0.5);
+		unsigned short int y = 0xFFFF*fx;
+		printf("hex: %x\t", y);
+		printf("fx: %f\n", fx);
+		x %= 360;
+		x++;
+	}
 }
 
 // Main function
