@@ -7,8 +7,11 @@ This is a project that is inteded to explore some of the more advanced features 
 * [ATmega382p Datasheet](http://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7810-Automotive-Microcontrollers-ATmega328P_Datasheet.pdf)
 * [ATtiny85-20P Datasheet](https://www.mouser.com/datasheet/2/268/Atmel-2586-AVR-8-bit-Microcontroller-ATtiny25-ATti-1315542.pdf)
 
+## Table of Contents
+* [1.1. ATmega328p/Blink Project Notes](#11-atmega328pblink-project-notes)
 
-## ATmega328p/Blink Project Notes:
+
+## 1.1. ATmega328p/Blink Project Notes:
 ------
 ### Fast PWM Mode:
 The pins listed below are the pins we will be using for the waveform generation of the PWM signal of two different color LED's.  
