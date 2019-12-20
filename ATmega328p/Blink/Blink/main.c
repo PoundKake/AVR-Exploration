@@ -85,6 +85,7 @@ void fastPWMModeCofig()
 /**
  * Alters the duty cycle of a Fast-PWM mode waveform.
  * 
+ * @param regComp char
  * @return void
  * 
  * Equation used to model cyclic pulse:
@@ -104,7 +105,7 @@ void fastPWMModeCofig()
  * Example: 
  *      x %= 360
  */
-void changeFastPWMDutyCycle() 
+void changeFastPWMDutyCycle(char regComp) 
 {
 	int x = 0;
 
@@ -112,13 +113,16 @@ void changeFastPWMDutyCycle()
 	// This should only be used for testing and configuration.
 	//
 	// For a continuous representation of this, just replace the for loop with 'while(1)'.
-	int Samples_Max = 720;
-	for(int i=0; i<=Samples_Max; i++)
+	//int Samples_Max = 720;
+	//for(int i=0; i<=Samples_Max; i++)
+	while(1)
 	{
 		double fx = ((-0.5)*cos((x*M_PI)/180) + 0.5);
 		unsigned short int y = 0xFFFF*fx;
-		printf("hex: %x\t", y);
-		printf("fx: %f\n", fx);
+		regComp = y;
+		
+		//printf("hex: %x\t", y);
+		//printf("fx: %f\n", fx);
 		x %= 360;
 		x++;
 	}
@@ -130,10 +134,25 @@ int main(void)
 	char pin5 = 0x20; // This defines the DDRx Register for PORTB. This should be 0001 0000
 	blinkOnBoardLEDConfig(pin5);
 	fastPWMModeCofig();
+	//changeFastPWMDutyCycle(OCR1A);
+	unsigned short int x1 = 0;
+	unsigned short int x2 = 90;
 	
-    /* Replace with your application code */
-    while (1) 
-    {
+	/* Replace with your application code */
+	while(1)
+	{
+		double fx1 = ((-0.5)*cos((x1*M_PI)/180) + 0.5);
+		double fx2 = ((-0.5)*cos((x2*M_PI)/180) + 0.5);
+		unsigned short int y1 = 0xFFFF*fx1;
+		unsigned short int y2 = 0xFFFF*fx2;
+		OCR1A = y1;
+		OCR1B = y2;
+		x1 %= 360;
+		x2 %= 360;
+		x1++;
+		x2++;
+		_delay_ms(15);
+		
 		// This blinks an led on and off. Useful for debugging and testing of the MCU control
 		//blinkOnBoardLED(pin5, DELAY_VAL_MS);
 	}
