@@ -58,7 +58,7 @@ TCCR1B |= (1 << CS10);  // START the timer with no prescaler.
 
 Now that we have the initial configuration set-up for the microcontroller,  it is time to look at the main logic of the program. To start we must consider the cyclic nature of  “breathing pulse” to be able to model this behaviour into an LED. When the term “cyclic” is used, people often first think of a sine or cosine wave. There are a few problems to consider with this model though. Both sine and cosine waves have vertical bounds of 1 and -1 and limitless horizontal bounts (they go on forever). We can fix the vertical limitation easily enough with some manipulation of the function but the limitless horizontal bound might be tricky since infinity and computers often don't get along. One potential solution around this is to have a repeating while loop which alters the function after every iteration so that the values it is calculating get reset and never increase beyond something a computer can’t handle. The mathematica model can be seen below as well as our solution to the ever growing values of the cosine function. I have chosen to use a modulo which will return the remainder of the two values divided by each other. This will keep our value between 0 and 360 (or 2*pi in radians).
 
-![](resources/Desmos-Capture-1.png)
+![model equation](resources/DesmosCapture1.png)
 
 The solution below represents two leds pulses modeled with the above equation with different phase shifts.
 
