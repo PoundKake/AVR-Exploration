@@ -55,3 +55,43 @@ TCCR1B |= (1 << WGM12)|(1 << WGM13);
     
 TCCR1B |= (1 << CS10);  // START the timer with no prescaler.
 ```
+
+Now that we have the initial configuration set-up for the microcontroller,  it is time to look at the main logic of the program. To start we must consider the cyclic nature of  “breathing pulse” to be able to model this behaviour into an LED. When the term “cyclic” is used, people often first think of a sine or cosine wave. There are a few problems to consider with this model though. Both sine and cosine waves have vertical bounds of 1 and -1 and limitless horizontal bounts (they go on forever). We can fix the vertical limitation easily enough with some manipulation of the function but the limitless horizontal bound might be tricky since infinity and computers often don't get along. One potential solution around this is to have a repeating while loop which alters the function after every iteration so that the values it is calculating get reset and never increase beyond something a computer can’t handle. The mathematica model can be seen below as well as our solution to the ever growing values of the cosine function. I have chosen to use a modulo which will return the remainder of the two values divided by each other. This will keep our value between 0 and 360 (or 2*pi in radians).
+
+![](resources/Desmos-Capture-1.png)
+
+The solution below represents two leds pulses modeled with the above equation with different phase shifts.
+
+```c
+// Main function
+int main(void)
+{
+	char pin5 = 0x20; // This defines the DDRx Register for PORTB. This should be 0001 0000
+	blinkOnBoardLEDConfig(pin5);
+	fastPWMModeCofig();
+	//changeFastPWMDutyCycle(OCR1A);
+	unsigned short int x1 = 0;
+	unsigned short int x2 = 90;
+	
+	/* Replace with your application code */
+	while(1)
+	{
+		double fx1 = ((-0.5)*cos((x1*M_PI)/180) + 0.5);
+		double fx2 = ((-0.5)*cos((x2*M_PI)/180) + 0.5);
+		unsigned short int y1 = 0xFFFF*fx1;
+		unsigned short int y2 = 0xFFFF*fx2;
+		OCR1A = y1;
+		OCR1B = y2;
+		x1 %= 360;
+		x2 %= 360;
+		x1++;
+		x2++;
+		_delay_ms(15);
+		
+		// This blinks an led on and off. Useful for debugging and testing of the MCU control
+		//blinkOnBoardLED(pin5, DELAY_VAL_MS);
+	}
+	return 0;
+}
+```
+

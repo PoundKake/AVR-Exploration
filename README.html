@@ -64,6 +64,40 @@ TCCR1B |= (<span class="hljs-number">1</span> &lt;&lt; WGM12)|(<span class="hljs
     
 TCCR1B |= (<span class="hljs-number">1</span> &lt;&lt; CS10);  <span class="hljs-comment">// START the timer with no prescaler.</span>
 </div></code></pre>
+<p>Now that we have the initial configuration set-up for the microcontroller,  it is time to look at the main logic of the program. To start we must consider the cyclic nature of  “breathing pulse” to be able to model this behaviour into an LED. When the term “cyclic” is used, people often first think of a sine or cosine wave. There are a few problems to consider with this model though. Both sine and cosine waves have vertical bounds of 1 and -1 and limitless horizontal bounts (they go on forever). We can fix the vertical limitation easily enough with some manipulation of the function but the limitless horizontal bound might be tricky since infinity and computers often don't get along. One potential solution around this is to have a repeating while loop which alters the function after every iteration so that the values it is calculating get reset and never increase beyond something a computer can’t handle. The mathematica model can be seen below as well as our solution to the ever growing values of the cosine function. I have chosen to use a modulo which will return the remainder of the two values divided by each other. This will keep our value between 0 and 360 (or 2*pi in radians).</p>
+<p><img src="file:///c:\Users\Christian\Documents\Software\MCU Dev\Atmel Studio 7\Projects\MCU-Exploration\resources\Desmos-Capture-1.png" alt=""></p>
+<p>The solution below represents two leds pulses modeled with the above equation with different phase shifts.</p>
+<pre><code class="language-c"><div><span class="hljs-comment">// Main function</span>
+<span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span>
+</span>{
+	<span class="hljs-keyword">char</span> pin5 = <span class="hljs-number">0x20</span>; <span class="hljs-comment">// This defines the DDRx Register for PORTB. This should be 0001 0000</span>
+	blinkOnBoardLEDConfig(pin5);
+	fastPWMModeCofig();
+	<span class="hljs-comment">//changeFastPWMDutyCycle(OCR1A);</span>
+	<span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">short</span> <span class="hljs-keyword">int</span> x1 = <span class="hljs-number">0</span>;
+	<span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">short</span> <span class="hljs-keyword">int</span> x2 = <span class="hljs-number">90</span>;
+	
+	<span class="hljs-comment">/* Replace with your application code */</span>
+	<span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>)
+	{
+		<span class="hljs-keyword">double</span> fx1 = ((<span class="hljs-number">-0.5</span>)*<span class="hljs-built_in">cos</span>((x1*M_PI)/<span class="hljs-number">180</span>) + <span class="hljs-number">0.5</span>);
+		<span class="hljs-keyword">double</span> fx2 = ((<span class="hljs-number">-0.5</span>)*<span class="hljs-built_in">cos</span>((x2*M_PI)/<span class="hljs-number">180</span>) + <span class="hljs-number">0.5</span>);
+		<span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">short</span> <span class="hljs-keyword">int</span> y1 = <span class="hljs-number">0xFFFF</span>*fx1;
+		<span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">short</span> <span class="hljs-keyword">int</span> y2 = <span class="hljs-number">0xFFFF</span>*fx2;
+		OCR1A = y1;
+		OCR1B = y2;
+		x1 %= <span class="hljs-number">360</span>;
+		x2 %= <span class="hljs-number">360</span>;
+		x1++;
+		x2++;
+		_delay_ms(<span class="hljs-number">15</span>);
+		
+		<span class="hljs-comment">// This blinks an led on and off. Useful for debugging and testing of the MCU control</span>
+		<span class="hljs-comment">//blinkOnBoardLED(pin5, DELAY_VAL_MS);</span>
+	}
+	<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+</div></code></pre>
 
     </body>
     </html>
